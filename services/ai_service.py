@@ -7,84 +7,70 @@ load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def get_client():
+    return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def generate_suggestions(case_description, investigation_steps):
 
-    logging.info(f"Generating suggestions for case: {case_description}")
-
-    prompt = f"""
-    You are a professional support engineer.
-
-    Analyze the following support case.
-
-    Suggest:
-    - Possible root causes
-    - Recommended next troubleshooting steps
-    - Estimated severity
-
-    Case Description:
-    {case_description}
-
-    Investigation Steps:
-    {investigation_steps}
-    """
+def generate_suggestions(case_description: str, investigation_steps: str) -> str:
+    logging.info("Generating suggestions for case: %s", case_description[:60])
+    client = get_client()
 
     response = client.chat.completions.create(
-
-        model="gpt-5-nano",
-
+        model="gpt-4o-mini",
         messages=[
             {
+                "role": "system",
+                "content": (
+                    "You are a professional SAP Ariba support engineer "
+                    "specialized in integration (API/EDI) and workflow issues."
+                ),
+            },
+            {
                 "role": "user",
-                "content": prompt
-            }
-        ]
+                "content": (
+                    f"Analyze the following support case and suggest:\n"
+                    f"- Possible root causes\n"
+                    f"- Recommended next troubleshooting steps\n"
+                    f"- Estimated severity\n\n"
+                    f"Case Description:\n{case_description}\n\n"
+                    f"Investigation Steps Already Done:\n{investigation_steps}"
+                ),
+            },
+        ],
     )
 
     content = response.choices[0].message.content
-
-    logging.info(f"AI response: {content}")
-
+    logging.info("Suggestions generated successfully")
     return content
 
-def improve_message(customer_message,case_description,investigation_steps):
+
+def improve_message(customer_message: str,case_description: str,investigation_steps: str,) -> str:
     logging.info("Improving customer message")
 
-    prompt = f"""
-    You are a professional support engineer.
-
-    Improve the following customer message.
-
-    Customer Message:
-    {customer_message}
-
-    Case Description:
-    {case_description}
-
-    Investigation Steps:
-    {investigation_steps}
-
-    Make the message:
-    - Professional
-    - Friendly
-    - Clear
-    - Concise
-    """
-
+    client = get_client()
     response = client.chat.completions.create(
-        model="gpt-5-mini",
-
+        model="gpt-4o-mini",
         messages=[
             {
+                "role": "system",
+                "content": (
+                    "You are a professional SAP Ariba support engineer "
+                    "specialized in clear, empathetic customer communication."
+                ),
+            },
+            {
                 "role": "user",
-                "content": prompt
-            }
-        ]
+                "content": (
+                    f"Improve the following customer message. "
+                    f"Make it professional, friendly, clear, and concise.\n\n"
+                    f"Case Description:\n{case_description}\n\n"
+                    f"Investigation Steps:\n{investigation_steps}\n\n"
+                    f"Draft Message:\n{customer_message}"
+                ),
+            },
+        ],
     )
 
     content = response.choices[0].message.content
-
     logging.info("Message improved successfully")
-
     return content

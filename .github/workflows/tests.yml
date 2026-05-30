@@ -1,0 +1,50 @@
+# Nome do workflow — aparece na aba "Actions" do GitHub
+name: Run Tests
+
+# ── Quando rodar ──────────────────────────────────────────────────────────────
+# "on" define os gatilhos. Aqui roda em dois momentos:
+on:
+  push:
+    branches: [main]        # toda vez que fizer push na branch main
+  pull_request:
+    branches: [main]        # toda vez que abrir um Pull Request para a main
+
+# ── Jobs ──────────────────────────────────────────────────────────────────────
+# Um workflow pode ter vários "jobs" rodando em paralelo.
+# Aqui temos só um: "test".
+jobs:
+  test:
+    # Qual sistema operacional usar na máquina virtual do GitHub
+    runs-on: ubuntu-latest
+
+    # ── Steps ───────────────────────────────────────────────────────────────
+    # Cada step é um comando ou ação executada em sequência.
+    # Se qualquer step falhar, os próximos são cancelados.
+    steps:
+
+      # Step 1: baixa o código do repositório para a máquina virtual
+      # "uses" significa que estamos usando uma Action pronta da comunidade
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: instala o Python na versão que definimos
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Step 3: instala as dependências do projeto
+      # "run" executa comandos shell diretamente
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest httpx
+
+      # Step 4: roda os testes com pytest
+      # A flag -v mostra cada teste individualmente no log do GitHub
+      - name: Run tests
+        run: pytest tests/ -v
+
+        # Variáveis de ambiente disponíveis durante esse step.
+        # A OPENAI_API_KEY precisa existir pro código importar sem erro,
+        # mas como mockamos a OpenAI nos testes, qualquer valor serve.
+        env:
+          OPENAI_API_KEY: "test-key-not-used"

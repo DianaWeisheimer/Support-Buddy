@@ -1,18 +1,21 @@
 from pydantic import BaseModel
 
-# --- Request bodies ---
 
 class SuggestRequest(BaseModel):
     case_description: str
-    investigation_steps: str
+    investigation_steps: list[str]  # agora é lista, não texto
+
+
+class UpdateCaseRequest(BaseModel):
+    case_description: str
+    investigation_steps: list[str]
 
 
 class ImproveRequest(BaseModel):
     customer_message: str
     case_description: str
-    investigation_steps: str
+    investigation_steps: str  # para mensagem, texto puro é suficiente
 
-# --- Response bodies ---
 
 class SuggestResponse(BaseModel):
     suggestions: str
@@ -25,5 +28,5 @@ class ImproveResponse(BaseModel):
 class CaseRecord(BaseModel):
     id: int
     case_description: str
-    investigation_steps: str
+    investigation_steps: list[str]  # lista no retorno também
     ai_response: str
