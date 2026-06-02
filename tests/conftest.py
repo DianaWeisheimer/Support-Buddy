@@ -26,9 +26,9 @@ def memory_db(monkeypatch):
 
 @pytest.fixture
 def mock_ai():
-    # O routes.py importa as funções diretamente com "from services.ai_service import ...".
-    # Isso cria cópias locais no namespace de api.routes.
-    # Regra do mock: sempre mockar no namespace onde a função É USADA, não onde foi definida.
+    # api.routes imports functions directly with "from services.ai_service import ...".
+    # That creates local copies in the api.routes namespace.
+    # Mocking rule: always patch the namespace where the function is USED, not where it is defined.
     with patch("api.routes.generate_suggestions") as mock_suggest, \
          patch("api.routes.improve_message") as mock_improve:
 

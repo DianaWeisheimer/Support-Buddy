@@ -33,5 +33,5 @@ app.include_router(router, prefix="/api")
 
 @app.get("/health")
 def health_check():
-    """Endpoint simples para verificar se a API está no ar."""
+    """Simple endpoint to check if the API is online."""
     return {"status": "ok"}

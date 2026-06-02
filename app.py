@@ -84,7 +84,7 @@ for k, v in {
     "improve_result": None,
     "viewing_case": None,
     "editing": False,
-    "new_steps": [],        # steps do formulário de novo case
+    "new_steps": [],        # new case form steps
 }.items():
     if k not in st.session_state:
         st.session_state[k] = v
@@ -105,7 +105,7 @@ def reset_to_new_case():
     st.session_state.new_steps      = []
 
 def render_steps_list(steps: list[str]):
-    """Renderiza a lista de steps numerada, do mais recente ao mais antigo."""
+    """Render the numbered steps list from newest to oldest."""
     if not steps:
         st.caption("No steps added yet.")
         return
@@ -186,7 +186,7 @@ if st.session_state.viewing_case:
             st.session_state.editing = not st.session_state.editing
             st.rerun()
 
-    # ── Modo edição ────────────────────────────────────────────────────────────
+    # ── Edit mode ─────────────────────────────────────────────────────────────
     if st.session_state.editing:
         col_left, col_right = st.columns(2)
 
@@ -206,7 +206,7 @@ if st.session_state.viewing_case:
             )
             if st.button("＋ Add step", key="btn_add_edit"):
                 if new_step_input.strip():
-                    # Novo step vai pro topo (índice 0) — mais recente primeiro
+                    # New step goes to the top (index 0) — newest first
                     updated_steps = [new_step_input.strip()] + steps
                     with st.spinner("Saving and generating new suggestions..."):
                         try:
@@ -234,7 +234,7 @@ if st.session_state.viewing_case:
             st.markdown('<div class="section-label">Current AI response</div>', unsafe_allow_html=True)
             st.markdown(f'<div class="result-box">{case["ai_response"]}</div>', unsafe_allow_html=True)
 
-    # ── Modo visualização ──────────────────────────────────────────────────────
+    # ── View mode ─────────────────────────────────────────────────────────────
     else:
         tab_view, tab_msg = st.tabs(["🗒️  Investigation", "✉️  Message improver"])
 
@@ -327,13 +327,13 @@ else:
     with col_btn:
         if st.button("＋ Add", use_container_width=True):
             if step_input.strip():
-                # Novo step vai pro topo — mais recente primeiro
+                # New step goes to the top — newest first
                 st.session_state.new_steps = [step_input.strip()] + st.session_state.new_steps
                 st.rerun()
             else:
                 st.warning("Write a step first.")
 
-    # Lista de steps adicionados
+    # List of added steps
     if st.session_state.new_steps:
         st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
         for i, step in enumerate(st.session_state.new_steps):

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class SuggestRequest(BaseModel):
     case_description: str
-    investigation_steps: list[str]  # agora é lista, não texto
+    investigation_steps: list[str]  # now a list, not text
 
 
 class UpdateCaseRequest(BaseModel):
@@ -14,7 +14,7 @@ class UpdateCaseRequest(BaseModel):
 class ImproveRequest(BaseModel):
     customer_message: str
     case_description: str
-    investigation_steps: str  # para mensagem, texto puro é suficiente
+    investigation_steps: str  # plain text is enough for the message
 
 
 class SuggestResponse(BaseModel):
@@ -28,5 +28,5 @@ class ImproveResponse(BaseModel):
 class CaseRecord(BaseModel):
     id: int
     case_description: str
-    investigation_steps: list[str]  # lista no retorno também
+    investigation_steps: list[str]  # list in the response as well
     ai_response: str

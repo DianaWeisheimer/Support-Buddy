@@ -1,14 +1,13 @@
-# ── Testes de integração dos endpoints ────────────────────────────────────────
+# ── Integration tests for endpoints ─────────────────────────────────────────
 #
-# Esses testes usam as fixtures 'client' e 'mock_ai' do conftest.py.
-# 'client' é o TestClient da FastAPI — faz requests HTTP reais contra a API
-# sem precisar de servidor. 'mock_ai' garante que a OpenAI não é chamada.
+# These tests use the 'client' and 'mock_ai' fixtures from conftest.py.
+# 'client' is FastAPI's TestClient — it makes real HTTP requests against the API
+# without needing a running server. 'mock_ai' ensures OpenAI is not called.
 
 
 # ── POST /api/suggest ──────────────────────────────────────────────────────────
 
-def test_suggest_retorna_200_com_dados_validos(client, mock_ai):
-    """Endpoint deve retornar 200 e o campo 'suggestions' preenchido."""
+def test_suggest_returns_200_with_valid_data(client, mock_ai):
     response = client.post("/api/suggest", json={
         "case_description": "EDI 850 PO not being received",
         "investigation_steps": ["Checked cXML logs", "Verified endpoint URL"],
@@ -19,19 +18,17 @@ def test_suggest_retorna_200_com_dados_validos(client, mock_ai):
     assert response.json()["suggestions"] == "1. Check the logs\n2. Verify credentials"
 
 
-def test_suggest_chama_ai_com_contexto_correto(client, mock_ai):
-    """A IA deve ser chamada com a descrição do case."""
+def test_suggest_calls_ai_with_correct_context(client, mock_ai):
     client.post("/api/suggest", json={
         "case_description": "Approval workflow stuck",
         "investigation_steps": ["Checked approver config"],
     })
 
-    # Verifica se generate_suggestions foi chamada (e não pulada)
+    # Verify generate_suggestions was called (and not skipped)
     assert mock_ai["suggest"].called
 
 
-def test_suggest_salva_case_no_banco(client, mock_ai, memory_db):
-    """Após o POST, o case deve estar salvo no banco."""
+def test_suggest_saves_case_to_database(client, mock_ai, memory_db):
     from services.database_service import get_cases
 
     client.post("/api/suggest", json={
@@ -44,13 +41,7 @@ def test_suggest_salva_case_no_banco(client, mock_ai, memory_db):
     assert cases[0][1] == "PO not syncing to ERP"
 
 
-def test_suggest_com_descricao_vazia_retorna_erro(client, mock_ai):
-    """
-    Descrição vazia deve retornar erro 500 pois a IA vai falhar
-    sem contexto. Pydantic valida o tipo, mas a lógica de negócio
-    rejeita strings vazias.
-    """
-    # Força a IA a lançar um erro com input vazio
+def test_suggest_with_empty_description_returns_error(client, mock_ai):
     mock_ai["suggest"].side_effect = ValueError("Empty description")
 
     response = client.post("/api/suggest", json={
@@ -63,8 +54,7 @@ def test_suggest_com_descricao_vazia_retorna_erro(client, mock_ai):
 
 # ── PUT /api/cases/{id} ────────────────────────────────────────────────────────
 
-def test_update_case_retorna_200(client, mock_ai, memory_db):
-    """Atualizar um case existente deve retornar 200 com novas sugestões."""
+def test_update_case_returns_200(client, mock_ai, memory_db):
     from services.database_service import save_case, get_cases
 
     save_case("EDI error", ["Initial step"], "Old response")
@@ -81,10 +71,10 @@ def test_update_case_retorna_200(client, mock_ai, memory_db):
 
 # ── POST /api/improve ──────────────────────────────────────────────────────────
 
-def test_improve_retorna_mensagem_melhorada(client, mock_ai):
-    """Endpoint deve retornar 200 e o campo 'improved_message'."""
+def test_improve_returns_enhanced_message(client, mock_ai):
     response = client.post("/api/improve", json={
         "customer_message": "hi we found error pls fix",
+        "tone": "empathetic",
         "case_description": "EDI 850 error",
         "investigation_steps": "1. Checked logs",
     })
@@ -96,16 +86,14 @@ def test_improve_retorna_mensagem_melhorada(client, mock_ai):
 
 # ── GET /api/cases ─────────────────────────────────────────────────────────────
 
-def test_get_cases_retorna_lista_vazia_inicialmente(client, mock_ai):
-    """Sem cases salvos, deve retornar lista vazia (não erro)."""
+def test_get_cases_returns_empty_list_initially(client, mock_ai):
     response = client.get("/api/cases")
 
     assert response.status_code == 200
     assert response.json() == []
 
 
-def test_get_cases_retorna_cases_salvos(client, mock_ai):
-    """Após salvar, GET /cases deve retornar os dados com steps como lista."""
+def test_get_cases_returns_saved_cases(client, mock_ai):
     client.post("/api/suggest", json={
         "case_description": "Workflow approval stuck",
         "investigation_steps": ["Checked approver", "Verified roles"],
@@ -116,7 +104,7 @@ def test_get_cases_retorna_cases_salvos(client, mock_ai):
 
     assert len(cases) == 1
     assert cases[0]["case_description"] == "Workflow approval stuck"
-    # Steps devem vir como lista, não como string
+    # Steps should come back as a list, not a string
     assert isinstance(cases[0]["investigation_steps"], list)
     assert "Checked approver" in cases[0]["investigation_steps"]
 
@@ -124,7 +112,6 @@ def test_get_cases_retorna_cases_salvos(client, mock_ai):
 # ── GET /health ────────────────────────────────────────────────────────────────
 
 def test_health_check(client):
-    """Health endpoint deve sempre retornar 200 com status ok."""
     response = client.get("/health")
 
     assert response.status_code == 200

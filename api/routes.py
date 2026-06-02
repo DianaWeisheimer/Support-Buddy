@@ -19,7 +19,7 @@ router = APIRouter()
 def suggest_next_steps(body: SuggestRequest):
     logger.info("POST /suggest — case: %s", body.case_description[:60])
     try:
-        # Junta a lista de steps em texto para mandar pra IA
+        # Join the list of steps into text before sending to the AI
         steps_text = "\n".join(
             f"{i+1}. {s}" for i, s in enumerate(body.investigation_steps)
         )
@@ -33,7 +33,6 @@ def suggest_next_steps(body: SuggestRequest):
 
 @router.put("/cases/{case_id}", response_model=SuggestResponse)
 def update_case_steps(case_id: int, body: UpdateCaseRequest):
-    """Atualiza os steps de um case existente e gera novas sugestões."""
     logger.info("PUT /cases/%d", case_id)
     try:
         steps_text = "\n".join(

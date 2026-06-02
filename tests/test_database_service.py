@@ -1,45 +1,45 @@
 from services.database_service import save_case, get_cases, update_case, json_to_steps
 
 
-# ── Testes de json_to_steps ────────────────────────────────────────────────────
+# ── json_to_steps tests ───────────────────────────────────────────────────────
 #
-# Essa função tem lógica de conversão com dois caminhos (JSON novo e texto
-# antigo) — é exatamente o tipo de coisa que vale testar unitariamente.
-# Não precisa de banco, não precisa de fixture, é pura lógica.
+# This function has conversion logic for two paths (new JSON and old plain text)
+# — exactly the kind of thing worth unit testing.
+# It does not require a database or fixture; it is pure logic.
 
-def test_json_to_steps_com_lista_json():
-    """Formato novo: JSON com lista de strings."""
+def test_json_to_steps_with_json_list():
+    """New format: JSON array of strings."""
     raw = '["Checked logs", "Verified credentials"]'
     result = json_to_steps(raw)
     assert result == ["Checked logs", "Verified credentials"]
 
 
-def test_json_to_steps_com_texto_puro():
-    """Formato antigo: texto separado por linha (retrocompatibilidade)."""
+def test_json_to_steps_with_plain_text():
+    """Old format: plain text separated by lines (backwards compatible)."""
     raw = "Checked logs\nVerified credentials"
     result = json_to_steps(raw)
     assert result == ["Checked logs", "Verified credentials"]
 
 
-def test_json_to_steps_com_string_vazia():
-    """Entrada vazia deve retornar lista vazia, não erro."""
+def test_json_to_steps_with_empty_string():
+    """Empty input should return an empty list, not an error."""
     assert json_to_steps("") == []
     assert json_to_steps("   ") == []
 
 
-def test_json_to_steps_com_none():
-    """None deve retornar lista vazia."""
+def test_json_to_steps_with_none():
+    """None should return an empty list."""
     assert json_to_steps(None) == []
 
 
-# ── Testes de save_case e get_cases ───────────────────────────────────────────
+# ── save_case and get_cases tests ───────────────────────────────────────────
 #
-# Esses testes usam a fixture 'memory_db' do conftest.py.
-# Note que o parâmetro da função tem o mesmo nome da fixture —
-# é assim que o pytest sabe que deve injetar ela aqui.
+# These tests use the 'memory_db' fixture from conftest.py.
+# Note that the function parameter matches the fixture name —
+# that is how pytest knows to inject it here.
 
-def test_save_case_e_recuperar(memory_db):
-    """Salvar um case e recuperar deve retornar os dados corretos."""
+def test_save_case_and_retrieve(memory_db):
+    """Saving a case and retrieving it should return the correct data."""
     steps = ["Checked cXML payload", "Verified EDI mapping"]
 
     save_case("EDI error on PO confirmation", steps, "Try checking the mapping")
@@ -51,20 +51,20 @@ def test_save_case_e_recuperar(memory_db):
     assert cases[0][3] == "Try checking the mapping"
 
 
-def test_get_cases_retorna_mais_recente_primeiro(memory_db):
-    """Cases devem vir em ordem decrescente de ID (mais novo primeiro)."""
+def test_get_cases_returns_most_recent_first(memory_db):
+    """Cases should be ordered descending by ID (newest first)."""
     save_case("First case",  ["step 1"], "response 1")
     save_case("Second case", ["step 2"], "response 2")
 
     cases = get_cases()
 
-    # O mais recente (Second case) deve ser o primeiro da lista
+    # Most recent (Second case) should be first in the list
     assert cases[0][1] == "Second case"
     assert cases[1][1] == "First case"
 
 
-def test_update_case_atualiza_steps_e_resposta(memory_db):
-    """Após update, os steps e a resposta devem refletir os novos valores."""
+def test_update_case_updates_steps_and_response(memory_db):
+    """After update, the steps and response should reflect the new values."""
     save_case("EDI error", ["Initial step"], "Initial response")
 
     cases = get_cases()

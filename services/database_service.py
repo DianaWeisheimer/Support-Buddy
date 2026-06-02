@@ -20,14 +20,14 @@ def create_table():
 
 
 def steps_to_json(steps: list[str]) -> str:
-    """Converte lista de steps para string JSON para salvar no banco."""
+    """Convert a list of steps to a JSON string for saving to the database."""
     return json.dumps(steps, ensure_ascii=False)
 
 
 def json_to_steps(raw: str) -> list[str]:
     """
-    Converte string do banco de volta para lista.
-    Suporta o formato antigo (texto puro) e o novo (JSON).
+    Convert a database string back to a list.
+    Supports the old plain-text format and the new JSON format.
     """
     if not raw or not raw.strip():
         return []
@@ -35,10 +35,10 @@ def json_to_steps(raw: str) -> list[str]:
         parsed = json.loads(raw)
         if isinstance(parsed, list):
             return parsed
-        # Era um JSON mas não era lista — trata como texto
+        # It was JSON but not a list — treat it as text
         return [raw]
     except (json.JSONDecodeError, ValueError):
-        # Formato antigo: texto puro separado por linha
+        # Old format: plain text separated by lines
         return [line.strip() for line in raw.strip().splitlines() if line.strip()]
 
 
