@@ -44,7 +44,7 @@ def generate_suggestions(case_description: str, investigation_steps: str) -> str
     return content
 
 
-def improve_message(customer_message: str,case_description: str,investigation_steps: str,) -> str:
+def improve_message(customer_message: str, tone: str, case_description: str, investigation_steps: str) -> str:
     logging.info("Improving customer message")
 
     client = get_client()
@@ -65,6 +65,7 @@ def improve_message(customer_message: str,case_description: str,investigation_st
                     f"Make it professional, friendly, clear, and concise.\n\n"
                     f"Case Description:\n{case_description}\n\n"
                     f"Investigation Steps:\n{investigation_steps}\n\n"
+                    f"Tone:\n{tone}\n\n"
                     f"Draft Message:\n{customer_message}"
                 ),
             },
