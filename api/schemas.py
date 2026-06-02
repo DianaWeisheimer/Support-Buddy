@@ -13,6 +13,7 @@ class UpdateCaseRequest(BaseModel):
 
 class ImproveRequest(BaseModel):
     customer_message: str
+    tone: str
     case_description: str
     investigation_steps: str  # plain text is enough for the message
 
