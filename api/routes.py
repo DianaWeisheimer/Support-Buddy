@@ -53,6 +53,7 @@ def improve_customer_message(body: ImproveRequest):
     try:
         improved = improve_message(
             body.customer_message,
+            body.tone,
             body.case_description,
             body.investigation_steps,
         )

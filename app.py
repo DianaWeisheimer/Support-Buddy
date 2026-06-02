@@ -277,6 +277,7 @@ if st.session_state.viewing_case:
                                 f"{API_URL}/improve",
                                 json={
                                     "customer_message": customer_message,
+                                    "tone": tone,
                                     "case_description": case["case_description"],
                                     "investigation_steps": steps_text,
                                 },
